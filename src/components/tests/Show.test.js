@@ -5,22 +5,71 @@ import userEvent from '@testing-library/user-event';
 import Show from './../Show';
 
 const testShow = {
-    //add in approprate test data structure here.
+    name: "Wendell Berry's Shop of Horrors",
+    summary: "shares stories of our lost agrarian roots",
+    seasons: [
+        {
+            id: 1,
+            name: "The World-Ending Fire",
+            episodes: []
+        },
+        {
+            id: 2,
+            name: "What are people for?",
+            episodes: []
+        },
+        {
+            id: 3,
+            name: "Building Soil",
+            episodes: []
+        }
+    ]
 }
 
 test('renders testShow and no selected Season without errors', ()=>{
+    render(<Show show={testShow} selectedSeason="none"/>);
 });
 
 test('renders Loading component when prop show is null', () => {
+    render(<Show show={null} selectedSeason="none"/>);
+
+    const loadingScreen = screen.queryByTestId("loading-container");
+
+    expect(loadingScreen).toBeInTheDocument();
 });
 
 test('renders same number of options seasons are passed in', ()=>{
+    render(<Show show={testShow} selectedSeason="none"/>);
+
+    const seasons = screen.getAllByTestId("season-option")
+    
+    expect(seasons.length).toBe(3);
 });
 
 test('handleSelect is called when an season is selected', () => {
+    const fakeHandle = jest.fn();
+
+    render(<Show show={testShow} selectedSeason="none" handleSelect={fakeHandle}/>);
+
+    const select = screen.getByLabelText(/Select A Season/i);
+  
+    userEvent.selectOptions(select, '1');
+
+    expect(fakeHandle).toHaveBeenCalled();
+
 });
 
 test('component renders when no seasons are selected and when rerenders with a season passed in', () => {
+
+    const {rerender} = render(<Show show={testShow} selectedSeason="none"/>);
+
+    const episodeComp = screen.queryByTestId("episodes-container")
+
+    expect(episodeComp).not.toBeInTheDocument();
+
+    rerender(<Show show={testShow} selectedSeason={"1"}/>)
+    
+    expect(screen.queryByTestId("episodes-container")).toBeInTheDocument();
 });
 
 //Tasks:

@@ -1,8 +1,80 @@
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import Display from './../Display';
+import userEvent from '@testing-library/user-event';
+
+import fetchShow from '../../api/fetchShow';
+jest.mock('../../api/fetchShow');
 
 
+const testShow = {
+    name: "Wendell Berry's Shop of Horrors",
+    summary: "shares stories of our lost agrarian roots",
+    seasons: [
+        {
+            id: 1,
+            name: "The World-Ending Fire",
+            episodes: []
+        },
+        {
+            id: 2,
+            name: "What are people for?",
+            episodes: []
+        },
+        {
+            id: 3,
+            name: "Building Soil",
+            episodes: []
+        }
+    ]
+}
+
+test("renders without error", () => {
+    render(<Display />)
+});
 
 
+test("when fetch button is pressed, show component displays (taking into account API call)", async () => {
+    
+    fetchShow.mockResolvedValueOnce(testShow);
 
+    render(<Display/>)
+    const button = screen.getByRole("button");
+    userEvent.click(button);
+
+    const showComp = await screen.findByTestId("show-container");
+    expect(showComp).toBeInTheDocument();
+});
+
+
+test("when fetch button is pressed, count of select options matches data", async () => {
+    
+    fetchShow.mockResolvedValueOnce(testShow);
+
+    render(<Display/>);
+
+    const button = screen.getByRole("button");
+    userEvent.click(button);
+
+    const seasons = await screen.findAllByTestId("season-option");
+    
+    expect(seasons.length).toBe(3);
+});
+
+
+test("when fetch button is pressed, passed function is called", async () => {
+    const fakeFunc = jest.fn();
+
+    fetchShow.mockResolvedValueOnce(testShow);
+
+    render(<Display displayFunc={fakeFunc}/>);
+
+    const button = screen.getByRole("button");
+    userEvent.click(button);
+
+    await waitFor(() => expect(fakeFunc).toHaveBeenCalled());
+    // await expect(fakeFunc).toHaveBeenCalled();
+});
 
 
 
